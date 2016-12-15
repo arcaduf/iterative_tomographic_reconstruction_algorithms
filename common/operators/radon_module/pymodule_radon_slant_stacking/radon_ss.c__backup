@@ -1,0 +1,141 @@
+/*
+ *  IMPLEMENTATION OF THE PIXEL-DRIVEN TOMOGRAPHIC PROJECTORS 
+ */
+
+
+#include <math.h>
+#include <stdio.h>
+#include <omp.h>
+
+#define pi 3.141592653589793
+# define eps 1e-5
+#define s45 0.70710678118654757
+
+
+
+
+void radon_ss( float* image , int npix , float *angles , int nang , int oper , int method , float *sino )
+{
+    int v, i, j, t, nh;
+    float theta, s, c, pho, w;
+
+    nh = (int)( npix * 0.5 );
+
+    int counter = 0;
+
+    for( v=0 ; v<nang ; v++ ){
+        //v = 60;
+        theta = angles[v];
+        s     = sin( theta );
+        c     = cos( theta );
+        //printf( "\n\nv = %d  s = %.6f  c = %.6f  fs = %.6f  fc = %.6f" , v, s, c, fabs( s ), fabs( c ) );
+
+        //  theta = pi/2
+        if( fabs( c ) < eps ){
+            for( i=0 ; i<npix ; i++ ){ 
+                for( j=0 ; j<npix ; j++ ){
+                    if( oper == 0 )
+                        sino[ ( nang - 1 - v ) * npix + j ] += image[ j * npix + i ];
+                    else
+                        image[ j * npix + i ] += sino[ ( nang - 1 - v ) * npix + j ];
+                }
+            }
+        }
+
+
+        //  theta = 0
+        else if( fabs( s ) < eps ){
+            for( i=0 ; i<npix ; i++ ){ 
+                for( j=0 ; j<npix ; j++ ){
+                    if( oper == 0 )
+                        sino[ ( nang - 1 - v ) * npix + j ] += image[ i * npix + j ];
+                    else
+                        image[ i * npix + j ] += sino[ ( nang - 1 - v ) * npix + j ];
+                }
+            } 
+        }
+        
+
+        //if( v== 0)
+        //    t = 1;
+
+        //  all other angles
+        else{
+            for( t=0 ; t<npix ; t++ ){
+                pho = ( float )( t + 0.5 - nh );
+
+                for( i=0 ; i<npix ; i++ ){ 
+                    //  pi/4 < theta < 3pi/4
+                    if( fabs( s ) > s45 ){
+                        if( method == 0 ){
+                            j = ( int )round( -c/s * ( i + 0.5 - nh ) + pho/s ) + nh;
+                            //printf("\ni = %d  t = %d  j = %d", i, t, j);
+
+                            if( j >=0 && j<npix ){
+                                if( oper == 0 )
+                                    sino[ ( nang -1 - v ) * npix + t ] += 1.0/fabs( s ) * image[ j * npix + i ];
+                                else
+                                    image[ j * npix + i ] += 1.0/fabs( s ) * sino[ ( nang -1 - v ) * npix + t ];
+                            }
+                        }
+                        
+                        else{
+                            w = -c/s * ( i + 0.5 - nh ) + pho/s;
+                            j = ( int )floor( w ) + nh;
+                            w = w - floor( w );
+                        
+                            if( oper == 0 ){
+                                if( j >=0 && j<npix )
+                                    sino[ ( nang -1 - v ) * npix + t ] += 1.0/fabs( s ) * ( 1 - w ) * image[ j * npix + i ];
+                                if( j+1 >=0 && j+1<npix )
+                                    sino[ ( nang -1 - v ) * npix + t ] += 1.0/fabs( s ) * w * image[ ( j + 1 ) * npix + i ];
+                            }
+                            else{
+                                if( j >=0 && j<npix )
+                                    image[ j * npix + i ] += 1.0/fabs( s ) * ( 1 - w ) * sino[ ( nang -1 - v ) * npix + t ];
+                                if( j+1 >=0 && j+1<npix ) 
+                                    image[ ( j + 1 ) * npix + i ] += 1.0/fabs( s ) * w * sino[ ( nang -1 - v ) * npix + t ];
+                            }
+                        }
+                    }
+
+
+                    else{
+                        if( method == 0 ){
+                            j = ( int )round( -s/c * ( i + 0.5 - nh ) + pho/c ) + nh;
+                            //printf("\ni = %d  t = %d  j = %d", i, t, j);
+
+                            if( j >=0 && j<npix ){
+                                if( oper == 0 )
+                                    sino[ ( nang -1 - v ) * npix + t ] += 1.0/fabs( c ) * image[ i * npix + j ];
+                                else
+                                    image[ i * npix + j ] += 1.0/fabs( c ) * sino[ ( nang -1 - v ) * npix + t ];
+                            }
+                        }
+                        
+                        else{
+                            w = -s/c * ( i + 0.5 - nh ) + pho/c;
+                            j = ( int )floor( w ) + nh;
+                            w = w - floor( w );
+                        
+                            if( oper == 0 ){
+                                if( j >=0 && j<npix )
+                                    sino[ ( nang -1 - v ) * npix + t ] += 1.0/fabs( c ) * ( 1 - w ) * image[ i * npix + j ];
+                                if( j+1 >=0 && j+1<npix )
+                                    sino[ ( nang -1 - v ) * npix + t ] += 1.0/fabs( c ) * w * image[ i * npix + j + 1 ];
+                            }
+                            else{
+                                if( j >=0 && j<npix )
+                                    image[ i * npix + j ] += 1.0/fabs( c ) * ( 1 - w ) * sino[ ( nang -1 - v ) * npix + t ];
+                                if( j+1 >=0 && j+1<npix ) 
+                                    image[ i * npix + j + 1 ] += 1.0/fabs( c ) * w * sino[ ( nang -1 - v ) * npix + t ];
+                            }
+                        }
+                    } 
+
+
+                }
+            }        
+        }
+    }
+}
