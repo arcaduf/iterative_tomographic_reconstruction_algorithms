@@ -47,7 +47,6 @@ import my_image_process as proc
 import my_image_display as dis
 import my_image_denoise as den
 import utils
-import progress_bar as pb
 
 
 
@@ -182,7 +181,12 @@ def getArgs():
                         help='Enable edge padding of the sinogram')
 
     parser.add_argument('-pi', dest='angle_pi', action='store_true',
-                        help='Eliminate last projection')   
+                        help='Eliminate last projection')
+
+    parser.add_argument('-nc', dest='num_cores', type=np.int, default=-1,
+                        help='Choose how many cores to use for parallel \
+                              computations in 3D. Examples: -nc -1 --> use \
+                              all available cores; -nc 2 --> use 2 cores')   
 
     args = parser.parse_args()
 
@@ -257,10 +261,15 @@ def sirt( x , b , tp , param ):
 
 
     ##  Initialize plot
+    if nz == 1:
+        nzz = 0
+    else:
+        nzz = np.int( 0.5 * nz )
+
     if param.plot is True:
         fig = plt.figure()
         ax1 = fig.add_subplot(111)
-        Ln = ax1.imshow( x[0,i2:i1:-1,i1:i2] , animated=True , cmap=cm.Greys_r )
+        Ln = ax1.imshow( x[nzz,i2:i1:-1,i1:i2] , animated=True , cmap=cm.Greys_r )
         plt.ion()
 
 
@@ -281,7 +290,6 @@ def sirt( x , b , tp , param ):
 
         results = [ pool.apply_async( sirt_step , args=( x[i,:,:] , b[i,:,:] , tp , R , C ) ) \
                     for i in range( nz ) ]
-        #sirt_step( x[0,:,:] , b[0,:,:] , tp , R , C )
         x = np.array( [ res.get() for res in results ] )
         pool.close()
         pool.join()
@@ -315,15 +323,15 @@ def sirt( x , b , tp , param ):
 
         ##  Evaluate convergence
         diff  = np.linalg.norm( x - x_old ) / np.linalg.norm( x_old )
-        obj = np.linalg.norm( tp.A( x[0,:,:] ) - b[0,:,:] )**2
+        obj = np.linalg.norm( tp.A( x[nzz,:,:] ) - b[nzz,:,:] )**2
         
         if param.checkit is True:
             if param.projector == 'grid-pswf' or param.projector == 'grid-kb':
-                x_aux = x[0,i1:i2,i1:i2].copy()
+                x_aux = x[nzz,i1:i2,i1:i2].copy()
             elif param.projector == 'radon':
-                x_aux = x[0,i2:i1:-1,i2:i1:-1].copy() 
+                x_aux = x[nzz,i2:i1:-1,i2:i1:-1].copy() 
             elif param.projector == 'bspline':
-                x_aux = bfun.convert_from_bspline_to_pixel_basis( x[0,i2:i1:-1,i2:i1:-1] , 3 )
+                x_aux = bfun.convert_from_bspline_to_pixel_basis( x[nzz,i2:i1:-1,i2:i1:-1] , 3 )
             if it < 10:
                 niter = '00' + str( it )
             elif it < 100:
@@ -344,7 +352,7 @@ def sirt( x , b , tp , param ):
 
         ##  Plot intermediate reconstruction as check
         if param.plot is True:
-            ax1.imshow( x[0,i2:i1:-1,i1:i2] , animated=True, cmap=cm.Greys_r )
+            ax1.imshow( x[nzz,i2:i1:-1,i1:i2] , animated=True, cmap=cm.Greys_r )
             plt.draw()
             plt.pause(1)
 
@@ -480,10 +488,6 @@ def save_reco( pathout , filein , args , param , reco ):
         filename += extension
         filename = pathout + filename
 
-    if os.path.isfile( filename ) is True:
-        print( '\nFile: ', filename, ' already exists!' )
-        filename = input( 'Digit new output name for the reconstruction: ' )
-    
     io.writeImage( filename , reco )
 
     print('\nReconstruction saved in:\n', filename)
@@ -645,7 +649,6 @@ def main():
         print('Number of slices: ', nz)
         
         print('\nLoading images .... ')
-        progress = pb.AnimatedProgressBar( end=nz , width=50 )        
         for i in range( nz ):
             if i == 0:
                 sino = io.readImage( pathin + filein[0][i] ).astype( myfloat )
@@ -653,8 +656,6 @@ def main():
                 sino_list.append( sino )
             else:
                 sino_list.append( io.readImage( pathin + filein[0][i] ).astype( myfloat ) )
-            progress + 1
-            progress.show_progress()
         print( ' done! ' )               
 
     print('\nNumber of projection angles: ', nang)
@@ -663,8 +664,13 @@ def main():
 
 
     ##  Check plot
+    if nz == 1:
+        nzz = 0
+    else:
+        nzz = np.int( 0.5 * nz )
+
     if args.plot is True:
-        dis.plot( sino_list[0] , 'Input sinogram' )
+        dis.plot( sino_list[nzz] , 'Input sinogram' )
 
 
 
@@ -743,7 +749,11 @@ def main():
     ##  Getting stopping criterion
     print('\nSetup of the iterative procedure:')
 
-    labelout = pathout + filein[0][ : len( filein[0] ) - 4 ]
+    if nz == 0:
+        labelout = pathout + filein[0][ : len( filein[0] ) - 4 ]
+    else:
+        labelout = pathout + filein[0][0][ : len( filein[0] ) - 4 ]     
+    
     param = cap.art_param( npix_old , nang , nz , ctr , labelout , args )
 
     
@@ -806,9 +816,12 @@ def main():
 
 
         ##  Show reconstruction
-        if args.plot is True and i==0:
+        if args.plot is True and i==0 and nz==1:
             dis.plot( reco , 'Reconstruction' )
             plot_convergence_curves( info )
+        elif args.plot is True and nz==nzz:
+            dis.plot( reco , 'Reconstruction' )
+            plot_convergence_curves( info ) 
 
     
         ##  Save reconstruction

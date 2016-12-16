@@ -9,6 +9,6 @@ from __future__ import division , print_function
 import os
 
 os.chdir( '../algorithms' )
-command = 'python -W ignore gridding_adjoint.py -Di ../data/sl3d/sl3d_256_sino_ang0304 -Do ../data/sl3d/sl3d_256_reco_ang0304 -f hanning'
+command = 'python -W ignore gridding_adjoint.py -Di ../data/sl3d/sl3d_128_sino_ang0200 -Do ../data/sl3d/sl3d_128_reco_ang0200 -f hanning'
 print( '\n\nCommand line:\n', command )
 os.system( command )

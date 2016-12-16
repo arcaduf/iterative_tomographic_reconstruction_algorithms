@@ -3,10 +3,8 @@ import numpy as np
 import sys
 import os
 import shutil
-sys.path.append( '../common/pymodule_myimage/' )
+sys.path.append( '../common/myimage/' )
 import my_image_io as io
-#sys.path.append( '../common/operators/dictionary_module/')
-#import dictionary_functions as df
 
 
 myint   = np.int
@@ -28,6 +26,7 @@ class art_param:
         self.mask          = []
         self.lt            = args.lt
         self.tv            = args.tv
+        self.num_cores     = args.num_cores
 
 
         ##  Tomographic projectors

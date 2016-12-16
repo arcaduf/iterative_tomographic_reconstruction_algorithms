@@ -9,6 +9,6 @@ from __future__ import division , print_function
 import os
 
 os.chdir( '../algorithms' )
-command = 'python -W ignore admm.py -Di ../data/sl3d/sl3d_256_sino_ang0304/ -Do ../data/sl3d/sl3d_256_reco_ang0304/ -pr grid-kb -r lasso -n1 4 -n2 4 -pp 1.0:1.0:1.0:1.0 -pc 0.0 -p'
+command = 'python -W ignore admm.py -Di ../data/sl3d/sl3d_128_sino_ang0200/ -Do ../data/sl3d/sl3d_128_reco_ang0200/ -pr grid-kb -r lasso -n1 4 -n2 4 -pp 1.0:1.0:1.0:1.0 -pc 0.0 -p'
 print( '\n\nCommand line:\n', command )
 os.system( command )

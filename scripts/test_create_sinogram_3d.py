@@ -8,6 +8,6 @@ from __future__ import division , print_function
 import os
 
 os.chdir( '../algorithms' )
-command = 'python -W ignore gridding_forward.py -Di ../data/sl3d/sl3d_256_phantom -Do ../data/sl3d/sl3d_256_sino_ang0304 -n 304'
+command = 'python -W ignore gridding_forward.py -Di ../data/sl3d/sl3d_128_phantom -Do ../data/sl3d/sl3d_128_sino_ang0200 -n 200'
 print( '\n\nCommand line:\n', command )
 os.system( command )

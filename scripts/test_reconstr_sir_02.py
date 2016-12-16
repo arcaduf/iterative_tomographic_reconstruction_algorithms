@@ -7,6 +7,6 @@ from __future__ import division , print_function
 import os
 
 os.chdir( '../algorithms' )
-command = 'python -W ignore sir.py -a sps -Di ../data/ -i shepp_logan_pix0256_ang0304_sino.DMP  -o shepp_logan_pix0256_ang0304_sino_reco.DMP -pr grid-pswf -r huber -hc 10.0 -n 30 -p'
+command = 'python -W ignore sir.py -a sps -Di ../data/ -i shepp_logan_pix0256_ang0304_sino.tif  -o shepp_logan_pix0256_ang0304_sino_reco.tif -pr grid-pswf -r huber -hc 10.0 -n 30 -p'
 print( '\n\nCommand line:\n', command )
 os.system( command )
