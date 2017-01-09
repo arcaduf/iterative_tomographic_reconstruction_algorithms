@@ -24,9 +24,9 @@ add the installation of the python package scikit-image.
 
 On a terminal, just type:
 	1) conda create -n test-repo python=2.7 anaconda
-	2) conda install -n test-repo scikit-image
-	2) source activate test-repo
-	3) download the repo and type: python setup.py
+	2) conda install -n test-repo Cython scikit-image
+	3) source activate test-repo
+	4) download the repo and type: python setup.py
 
 If setup.py runs without giving any error all subroutines in C have been installed and
 your python version meets all dependencies.

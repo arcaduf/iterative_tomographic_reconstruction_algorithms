@@ -481,7 +481,7 @@ def save_reco( pathout , filein , args , param , reco ):
         filename = pathout + args.reco
 
     else:        
-        filename = filein
+        filename = flein
         extension = filename[len(filename)-4:] 
         filename = filename[:len(filename)-4]
         filename += param.root

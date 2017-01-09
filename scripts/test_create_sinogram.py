@@ -6,6 +6,6 @@ from __future__ import division , print_function
 import os
 
 os.chdir( '../algorithms' )
-command = 'python -W ignore gridding_forward.py -Di ../data/ -i shepp_logan_pix0256.tif -n 304 -p'
+command = 'python -W ignore gridding_forward.py -Di ../data/ -i shepp_logan_pix0256.tif -n 304'
 print( '\n\nCommand line:\n', command )
 os.system( command )
