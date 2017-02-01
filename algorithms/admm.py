@@ -214,6 +214,10 @@ def getArgs():
 
     args = parser.parse_args()
 
+    if args.filein is None:
+        parser.print_help()
+        sys.exit('\nERROR: Input sinogram not specified!\n')   
+
     if args.n_iter is None and args.eps is None:
         parser.print_help()
         sys.exit('\nERROR: Stopping criterion not specified!\n')
