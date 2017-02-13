@@ -32,7 +32,7 @@ Procedure:
 
 3. Activate the environment: `source activate iter-rec`.
 
-4. Download the repository (if not done yet): `git clone git@github.com:arcaduf/iterative_tomographic_reconstruction_algorithms.git`.
+4. Download the repository: `git clone git@github.com:arcaduf/iterative_tomographic_reconstruction_algorithms.git`.
  
 5. Install routines in C: `python setup.py`.
 
