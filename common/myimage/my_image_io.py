@@ -28,6 +28,7 @@ import numpy as np
 import scipy
 from scipy import misc as misc
 import skimage.io as skio
+from PIL import Image
 
 
 
